@@ -53,6 +53,7 @@ import (
 	"text/template"
 	"bytes"
 	"io"
+	"os"
 	"errors"
 )
 
@@ -138,6 +139,13 @@ func Translations() []Language {
 	return ts
 }
 
+//根据languageTag获取国家代码
+func CountryCode(languageTag string)string{
+	parts := strings.Split(languageTag, "-")
+	return strings.ToUpper(parts[len(parts)-1])
+
+}
+
 //新建语言
 func NewLanguage(languageTag,name,country string)*translation{
 	lang:= new(translation)
@@ -171,7 +179,7 @@ func TranslationMatch(languageTag string, languageTags ...string) *translation {
 
 			for _,mL:=range matchesL{
 				for _,mT:=range matchesT{
-					if mL== mT {
+					if strings.ToUpper(mL)== strings.ToUpper(mT) {
 						return l
 					}
 				}
@@ -413,6 +421,12 @@ func (lang *translation)Update(tag,templatestr string ) error{
 }
 
 
+//保存语言到文件
+func (lang *translation)WriteFile(filename string) error{
+	file, _ := os.OpenFile(filename, os.O_RDWR | os.O_CREATE, 0666)
+	defer file.Close()
+	return lang.Write(file)
+}
 
 //保存语言
 func (lang *translation)Write(w io.Writer) error{
